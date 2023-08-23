@@ -1,0 +1,5 @@
+{
+  "lightsState" : "uint8_t",
+  "left" : [uint8_t, uint8_t, uint8_t, uint8_t],
+  "right" : [uint8_t, uint8_t, uint8_t, uint8_t]
+}
