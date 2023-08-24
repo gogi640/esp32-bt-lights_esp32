@@ -3,12 +3,16 @@
 
 BluetoothSerial *BT;
 char *json = new char[100];
+StaticJsonDocument<100> doc;
+
+int* left = new int(4);
+int* right = new int(4);
+int* lightState;
 
 void setup() {
   // put your setup code here, to run once:
   BT = new BluetoothSerial();
   BT->begin("BMW");
-  StaticJsonDocument<100> doc;
   Serial.begin(115200);
 
 }
@@ -24,6 +28,25 @@ void loop() {
   }
   if(i!=0)
   {
+    DeserializationError error = deserializeJson(doc, json);
+
+    // Test if parsing succeeds.
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      BT->println("NE");
+    }
+    else
+    {
+      BT->println("DA");
+      *lightState = doc["lightState"];
+      for(int k=0;k<4;k++)
+      {
+        left[k] = doc["left"][k];
+        right[k] = doc["right"][k];
+      }
+    }
+    /*
     Serial.println(i);
     BT->println("DA");
     for(int j=0;j<i;j++)
@@ -33,6 +56,6 @@ void loop() {
     }
     Serial.println();
     Serial.println("Outputed!");
-   // doThing();
+   // doThing();*/
   }
 }
