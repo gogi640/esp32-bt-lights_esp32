@@ -45,6 +45,7 @@ void loop() {
         left[k] = doc["left"][k];
         right[k] = doc["right"][k];
       }
+      dumpAll();
     }
     /*
     Serial.println(i);
@@ -58,4 +59,26 @@ void loop() {
     Serial.println("Outputed!");
    // doThing();*/
   }
+}
+
+void dumpAll()
+{
+  Serial.print("lightState: ");
+  Serial.println(*lightState);
+  Serial.print("LR: ");
+  Serial.println(left[0]);
+  Serial.print("LG: ");
+  Serial.println(left[1]);
+  Serial.print("LB: ");
+  Serial.println(left[2]);
+  Serial.print("LW: ");
+  Serial.println(left[3]);
+  Serial.print("RR: ");
+  Serial.println(right[0]);
+  Serial.print("RG: ");
+  Serial.println(right[1]);
+  Serial.print("RB: ");
+  Serial.println(right[2]);
+  Serial.print("RW: ");
+  Serial.println(right[3]);
 }
