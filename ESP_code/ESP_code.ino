@@ -5,59 +5,26 @@ BluetoothSerial *BT;
 char *json = new char[100];
 StaticJsonDocument<100> doc;
 
-int* left = new int(4);
-int* right = new int(4);
-int* lightState;
+uint8_t* left = new uint8_t(4);
+uint8_t* right = new uint8_t(4);
+uint8_t* lightState;
+bool* policeMode = 0;
+bool* inputExist = 0;
+uint8_t* inputSize = 0;
 
 void setup() {
   // put your setup code here, to run once:
   BT = new BluetoothSerial();
   BT->begin("BMW");
   Serial.begin(115200);
-
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  int i=0;
-  while(BT->available())
+  if(BT->available()) 
   {
-    json[i] =BT->read();
-    i++;
-    delayMicroseconds(100);
-  }
-  if(i!=0)
-  {
-    DeserializationError error = deserializeJson(doc, json);
-
-    // Test if parsing succeeds.
-    if (error) {
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.f_str());
-      BT->println("NE");
-    }
-    else
-    {
-      BT->println("DA");
-      *lightState = doc["lightState"];
-      for(int k=0;k<4;k++)
-      {
-        left[k] = doc["left"][k];
-        right[k] = doc["right"][k];
-      }
-      dumpAll();
-    }
-    /*
-    Serial.println(i);
-    BT->println("DA");
-    for(int j=0;j<i;j++)
-    {
-      if(json[j] < 10) Serial.print("0");
-      Serial.print(json[j],1);
-    }
-    Serial.println();
-    Serial.println("Outputed!");
-   // doThing();*/
+    *inputSize = BtReceive();
+    *inputExist = 1;
+    processInput();
   }
 }
 
@@ -81,4 +48,59 @@ void dumpAll()
   Serial.println(right[2]);
   Serial.print("RW: ");
   Serial.println(right[3]);
+}
+
+bool processInput()
+{
+  if(*inputExist)
+  {
+    DeserializationError error = deserializeJson(doc, json);
+
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      BT->println("NE");
+      return 0;
+    }
+    else
+    {
+      BT->println("DA");
+      *lightState = doc["lightState"];
+
+      for(int k=0;k<4;k++)
+      {
+        left[k] = doc["left"][k];
+        right[k] = doc["right"][k];
+      }
+      memset(json, 0, 100 * sizeof(char));
+      dumpAll();
+    }
+    *inputExist = 0;
+  }
+
+  switch(*lightState)
+  {
+    case 1:
+      *policeMode = 1;
+      break;
+    case 2:
+      //...
+      break;
+    default:
+      //...
+      break;
+  }
+  return 1;
+}
+
+int BtReceive()
+{
+  int i=0;
+  while(BT->available())
+  {
+    json[i] =BT->read();
+    i++;
+    delayMicroseconds(100);
+  }
+  return i;
 }
